@@ -2,36 +2,44 @@ name: Publish OMGut
 on:
   push:
     branches: [main]
+    paths: ['public/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
+  actions: read
   pages: write
   id-token: write
 concurrency:
   group: pages
   cancel-in-progress: false
 jobs:
-  publish:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+  deploy:
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v5
-      - name: Restore missing files from local archive
-        run: python3 scripts/import_site.py
-      - name: Archive website files in this repository
+      - name: Wait for uploaded artifact to become visible
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public
-          if ! git diff --cached --quiet; then
-            git commit -m "Archive complete OMGut static website"
-            git push
-          fi
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
+          for attempt in $(seq 1 12); do
+            count=$(gh api "repos/$REPO/actions/runs/$RUN_ID/artifacts" --jq '[.artifacts[] | select(.name == "github-pages" and .expired == false)] | length')
+            if [ "$count" -gt 0 ]; then exit 0; fi
+            sleep 5
+          done
+          echo "Uploaded Pages artifact did not become visible"
+          exit 1
       - uses: actions/deploy-pages@v4
         id: deployment
