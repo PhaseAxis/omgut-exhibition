@@ -1,17 +1,17 @@
-import hashlib, json, pathlib, urllib.request
+import base64, hashlib, io, json, pathlib, zipfile
 root = pathlib.Path("public")
 root.mkdir(exist_ok=True)
 manifest = json.loads(pathlib.Path("migration-manifest.json").read_text())
+parts = sorted(pathlib.Path(".migration").glob("part-*.txt"))
+archive = zipfile.ZipFile(io.BytesIO(base64.b64decode("".join(p.read_text() for p in parts), validate=True)))
 for name, expected in manifest.items():
     target = root / name
     if target.exists():
         continue
-    url = "https://omgut-research-concept.shukaicao2026.chatgpt.site/" + name
-    with urllib.request.urlopen(url, timeout=60) as response:
-        data = response.read()
+    data = archive.read(name)
     if hashlib.sha256(data).hexdigest() != expected:
         raise RuntimeError("Checksum mismatch: " + name)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(data)
 (root / ".nojekyll").touch()
-print("Website files ready; subsequent deployments use repository copies.")
+print("Verified and restored all website files from local archive.")
