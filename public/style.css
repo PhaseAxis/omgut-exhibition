@@ -16,3 +16,6 @@ header .logo img,footer .logo img{width:158px;height:auto;display:block}footer .
 
 /* The highlighted O + M + Gut spell the project name. */
 .brand-headline{font-family:Georgia,"Times New Roman",serif;font-size:clamp(64px,6.6vw,100px);font-weight:400;line-height:1.08;letter-spacing:-4px;margin:0 0 30px}.brand-line{display:block;white-space:nowrap}.brand-headline .brand-accent{color:#237f78}.brand-headline .brand-line+ .brand-line{margin-top:7px}@media(max-width:900px){.hero .brand-headline{font-size:clamp(56px,7.5vw,76px);letter-spacing:-3px}}@media(max-width:600px){.hero .brand-headline{font-size:clamp(54px,14.5vw,80px);letter-spacing:-2.5px}}
+
+/* Preserve original portrait pixels; replace only the visible brand area. */
+.team-photo-frame{position:relative;overflow:hidden;border-radius:22px}.team-photo-frame>img{border-radius:0}.team-photo-brand{position:absolute;left:0;top:0;width:40%;height:22%;background:#c9d5d3;display:flex;align-items:center;justify-content:center;padding:2% 1.5%;pointer-events:none}.team-photo .team-photo-brand img{width:100%;height:auto;border-radius:0;object-fit:contain}@media(max-width:600px){.team-photo-frame{border-radius:14px}}
