@@ -1,37 +1,7 @@
 name: Publish OMGut
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: false
+on: workflow_dispatch
 jobs:
-  publish:
+  pending:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Import missing site files with checksum verification
-        run: python3 scripts/import_site.py
-      - name: Archive imported files in this repository
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public
-          if ! git diff --cached --quiet; then
-            git commit -m "Archive complete OMGut static website"
-            git push
-          fi
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-      - uses: actions/deploy-pages@v4
-        id: deployment
+      - run: echo 'Local website import in progress'
